@@ -9,7 +9,7 @@ server.on('connection', async (client) => {
   client.setNoDelay(true)
 
   client.log = function (text) {
-    return console.log(`[${this.remoteAddress.split(':').slice(-1)}] >> ${text}`)
+    return console.log(`[LOG] >> ${text}`)
   }
 
   client.log('Client connected.')
@@ -94,4 +94,5 @@ server.once('listening', () => console.log(`[SERVER] >> Proxy started on ${PORT}
 server.listen(PORT)
 
 process.on("uncaughtException", e => console.log(e))
+
 process.on("unhandledRejection", e => console.log(e))
