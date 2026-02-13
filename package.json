@@ -1,7 +1,7 @@
 {
-  "name": "nodebrawl-core",
-  "version": "2.3.1",
-  "description": "The world's first open source Brawl Stars private server core written on JavaScript.",
+  "name": "nodebrawl-proxy",
+  "version": "1.0.0",
+  "description": "Open source Brawl Stars client written on JavaScript.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

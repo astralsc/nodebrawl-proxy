@@ -1,46 +1,78 @@
 const net = require('net')
-const MessageFactory = require('./Protocol/MessageFactory')
+const { execSync } = require('child_process')
+const os = require('os')
 const server = new net.Server()
-const Messages = new MessageFactory()
-
-const PORT = 9339
+const config = require('./config.json')
+const PORT = config.ProxyPort
 
 server.on('connection', async (client) => {
   client.setNoDelay(true)
+
   client.log = function (text) {
     return console.log(`[${this.remoteAddress.split(':').slice(-1)}] >> ${text}`)
   }
 
-  client.log('A wild connection appeard!')
-  
-  const packets = Messages.getPackets();
+  client.log('Client connected.')
+
+  const remote = net.createConnection({
+    host: "127.0.0.1",
+    port: config.ServerPort
+  })
+
+  remote.setNoDelay(true)
 
   client.on('data', async (packet) => {
-    const message = {
-      id: packet.readUInt16BE(0),
-      len: packet.readUIntBE(2, 3),
-      version: packet.readUInt16BE(5),
-      payload: packet.slice(7, this.len),
-      client,
-    }
-    if (packets.indexOf(String(message.id)) !== -1) {
-      try {
-        const packet = new (Messages.handle(message.id))(message.payload, client)
+    try {
+      if (packet.length >= 7) {
+        const len = packet.readUIntBE(2, 3)
 
-        client.log(`Gotcha ${message.id} (${packet.constructor.name}) packet! `)
+        if (packet.length >= 7 + len) {
+          const message = {
+            id: packet.readUInt16BE(0),
+            len: len,
+            version: packet.readUInt16BE(5),
+            payload: packet.slice(7, len),
+            client,
+          }
 
-        await packet.decode()
-        await packet.process()
-      } catch (e) {
-        console.log(e)
+          client.log(`Gotcha ${message.id} client packet!`)
+        }
       }
-    } else {
-      client.log(`Gotcha undefined ${message.id} packet!`)
+
+      // forward packet to server
+      remote.write(packet)
+
+    } catch (err) {
+      console.log(err)
     }
   })
 
+  // forward server to client
+  remote.on('data', (packet) => {
+    const len = packet.readUIntBE(2, 3)
+
+    if (packet.length >= 7 + len) {
+      const message = {
+        id: packet.readUInt16BE(0),
+        len: len,
+        version: packet.readUInt16BE(5),
+        payload: packet.slice(7, len),
+        client,
+      }
+
+      client.log(`Gotcha ${message.id} server packet!`)
+    }
+
+    client.write(packet)
+  })
+
   client.on('end', async () => {
-    return client.log('Client disconnected.')
+    client.log('Client disconnected.')
+    remote.destroy()
+  })
+
+  remote.on('end', () => {
+    client.destroy()
   })
 
   client.on('error', async error => {
@@ -48,14 +80,18 @@ server.on('connection', async (client) => {
       client.log('A wild error!')
       console.log(error)
       client.destroy()
+      remote.destroy()
     } catch (e) { }
+  })
+
+  remote.on('error', (err) => {
+    console.log(err)
+    client.destroy()
   })
 })
 
-server.once('listening', () => console.log(`[SERVER] >> Server started on ${PORT} port!`))
+server.once('listening', () => console.log(`[SERVER] >> Proxy started on ${PORT} port!`))
 server.listen(PORT)
 
-
-process.on("uncaughtException", e => console.log(e));
-
-process.on("unhandledRejection", e => console.log(e));
+process.on("uncaughtException", e => console.log(e))
+process.on("unhandledRejection", e => console.log(e))
