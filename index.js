@@ -39,7 +39,7 @@ server.on('connection', async (client) => {
         }
       }
 
-      // forward packet to server
+      // forward client to server
       remote.write(packet)
 
     } catch (err) {
@@ -96,3 +96,4 @@ server.listen(PORT)
 process.on("uncaughtException", e => console.log(e))
 
 process.on("unhandledRejection", e => console.log(e))
+
