@@ -15,7 +15,7 @@ server.on('connection', async (client) => {
   client.log('Client connected.')
 
   const remote = net.createConnection({
-    host: "127.0.0.1",
+    host: config.ServerIP,
     port: config.ServerPort
   })
 
