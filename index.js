@@ -36,6 +36,8 @@ server.on('connection', async (client) => {
           }
 
           client.log(`Gotcha ${message.id} client packet!`)
+
+          //console.log(`${message.id} Dump:`, message.payload.toString('hex'))
         }
       }
 
@@ -61,6 +63,8 @@ server.on('connection', async (client) => {
       }
 
       client.log(`Gotcha ${message.id} server packet!`)
+
+      //console.log(`${message.id} Dump:`, message.payload.toString('hex'))
     }
 
     client.write(packet)
