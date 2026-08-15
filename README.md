@@ -2,7 +2,7 @@
 Open source Brawl Stars proxy written in Node.js <br>
 
 ## Requirements
-* [NodeJS](https://nodejs.org/)
+* [Node.js](https://nodejs.org/)
 
 ## Setting up
 1. Download/clone a repository
