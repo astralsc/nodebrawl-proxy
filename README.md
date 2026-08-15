@@ -1,5 +1,5 @@
 # nodebrawl-proxy
-Open source Brawl Stars client written on JavaScript. <br>
+Open source Brawl Stars client written in Node.js <br>
 
 ## Requirements
 * [NodeJS](https://nodejs.org/)
